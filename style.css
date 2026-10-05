@@ -56,7 +56,9 @@ h1{font-size:15px;margin:0;white-space:nowrap}
 /* ---------------------------------------------------------------- layout */
 main{display:grid;grid-template-columns:1fr;grid-template-rows:1fr auto;min-height:0;position:relative}
 main.collapsed{grid-template-rows:1fr 0}
-.mapcell{position:relative;min-height:0;min-width:0;grid-row:1}
+/* isolation: Leaflet's panes use z-index 400-1000; without this they paint OVER the
+   fleet sheet on phones, where the sheet overlaps the map. */
+.mapcell{position:relative;isolation:isolate;z-index:0;min-height:0;min-width:0;grid-row:1}
 #map{position:absolute;top:0;right:0;bottom:0;left:0;background:#e8eaed}
 
 /* ---------------------------------------------------------------- fleet sheet */
@@ -167,15 +169,20 @@ main.collapsed .sheet{height:0;border-top:0;box-shadow:none;overflow:hidden}
     grid-row:1;grid-column:1;align-self:end;width:100%;border-radius:16px 16px 0 0;
     max-height:76vh;
   }
-  main.collapsed .sheet{height:0}
+  /* Closed list = a slim "Show buses" bar you can tap or drag up, never fully gone */
+  main.collapsed .sheet{height:auto;max-height:none;overflow:hidden;
+    border-top:1px solid var(--b);box-shadow:0 -6px 20px rgba(15,23,42,.08)}
+  main.collapsed .sheet .tabs, main.collapsed .sheet #list, main.collapsed .sheet .hint{display:none}
+  main.collapsed .grab{height:42px}
+  main.collapsed .grab::after{content:"Show buses";font-size:13px;font-weight:700;color:var(--ink);margin-left:10px}
   /* Both items MUST share column 1; without grid-column the map is pushed into an
      implicit second column and collapses to zero width. */
   .mapcell{grid-row:1;grid-column:1}
   /* keep the buttons and toasts above the list instead of on top of it */
   .dock{bottom:calc(var(--sheet-h) + 12px)}
   .toast{bottom:calc(var(--sheet-h) + 16px)}
-  main.collapsed .dock{bottom:12px}
-  main.collapsed .toast{bottom:76px}
+  main.collapsed .dock{bottom:calc(54px + var(--safe-b))}
+  main.collapsed .toast{bottom:calc(66px + var(--safe-b))}
 }
 /* landscape phones: the sheet would eat the map, so cap it and let it shrink */
 @media (max-width:899px) and (orientation:landscape){
@@ -192,4 +199,39 @@ main.collapsed .sheet{height:0;border-top:0;box-shadow:none;overflow:hidden}
 
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+
+/* ======================================================================
+   Full screen / clean view: show the ORIGINAL map edge to edge. Nothing is
+   drawn behind the header or over the map -- only the small icon buttons,
+   the Live badge and the bus labels float on top. The bus list is tucked
+   away (open it with the menu button).  Toggled by .fs-on on #app.
+   ====================================================================== */
+.app{position:relative}
+.app.fs-on{grid-template-rows:1fr}
+.app.fs-on header{
+  position:absolute;top:0;left:0;right:0;flex-wrap:nowrap;
+  background:transparent;border:0;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  pointer-events:none;                     /* touches on empty areas go to the map */
+}
+.app.fs-on header .iconbtn,.app.fs-on header .livepill{pointer-events:auto}
+.app.fs-on .iconbtn,.app.fs-on .livepill{box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.app.fs-on .titles{min-width:0;overflow:hidden;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,.7)}
+.app.fs-on h1,.app.fs-on .meta,.app.fs-on .meta b{color:#fff}
+.app.fs-on .meta{flex-wrap:nowrap;overflow:hidden}
+/* the closed list leaves no bar behind in this mode */
+.app.fs-on main.collapsed .sheet{display:none}
+/* the header no longer takes space, so keep the map's own buttons clear of the icons */
+.app.fs-on .leaflet-top{margin-top:calc(62px + var(--safe-t))}
+.app.fs-on #err{top:calc(72px + var(--safe-t))}
+
+@media (min-width:900px){
+  /* desktop: if you open the list, it floats over the map instead of taking a column */
+  .app.fs-on main,.app.fs-on main.collapsed{grid-template-columns:minmax(0,1fr)}
+  .app.fs-on .mapcell{grid-column:1}
+  .app.fs-on .sheet{width:300px;justify-self:start;box-shadow:4px 0 20px rgba(0,0,0,.25);
+                    padding-top:calc(62px + var(--safe-t))}
+  .app.fs-on .leaflet-top.leaflet-left{margin-left:310px}
+  .app.fs-on main.collapsed .leaflet-top.leaflet-left{margin-left:0}
 }
