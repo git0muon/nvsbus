@@ -24,6 +24,23 @@ python -m http.server 8000 --directory docs
 # then open http://127.0.0.1:8000/
 ```
 
+## On a phone
+
+The site is built mobile-first, so it works as a shared link or added to the Home Screen:
+
+- **Full-screen button** in the header (enters/exits full screen, with an icon that swaps).
+  On iPhone, where Safari has no element full-screen API, the button explains to use
+  *Share → Add to Home Screen* instead — and the page ships the Apple meta tags needed for
+  that to open without browser chrome.
+- **Draggable fleet sheet** — swipe it down to see more map, up for more list. Tapping a bus
+  collapses it to a peek automatically so the map is visible.
+- **Tap a bus** in the list to fly the map to it and open its details.
+- **Follow** button (or *Follow this bus* inside a popup) keeps that bus centred as new
+  positions arrive, with the map gently panning rather than jumping.
+- **Locate** button frames the whole fleet again.
+- Safe-area padding for notched screens, 40 px+ touch targets, no rubber-band scrolling, and
+  animations that respect `prefers-reduced-motion`.
+
 ## Configure
 
 Everything the static build needs is in [`docs/config.js`](docs/config.js): the share token,
@@ -72,6 +89,17 @@ sharp tiled imagery, all four map types, and a working traffic layer.
 
 **The static Leaflet build has none of these problems**, which is why it is the recommended
 one to publish.
+
+## Tests
+
+The browser code is verified offline: `work/test_app.js` runs `docs/app.js` in Node with
+Leaflet and DOM stubs and asserts the API call, the data mapping (m/s → km/h, offline rule),
+markers, the fleet list, tab filters, tap-to-centre, live follow, locate, the full-screen
+toggle including the `<html>`-only fallback, the sheet, and error recovery.
+
+```powershell
+node work/test_app.js
+```
 
 ## Other files
 
