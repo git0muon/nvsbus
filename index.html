@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Live Tracking">
+<meta name="description" content="Compass live fleet tracking on a natively tiled Leaflet map (OpenStreetMap and Esri imagery).">
+<title>Live Tracking</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%231B2A6B'/%3E%3Cpolygon points='50,12 40,50 50,42 60,50' fill='%233AABDB'/%3E%3Cpolygon points='50,88 40,50 50,58 60,50' fill='%23E24B4A'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <button class="iconbtn" id="toggleside" title="Show or hide the fleet list" aria-label="Show or hide the fleet list">&#9776;</button>
+    <div class="titles">
+      <h1>Live Tracking</h1>
+      <div class="meta">
+        <span><i class="dot moving"></i><b id="online">-</b>/<span id="total">-</span> online</span>
+        <span><i class="dot moving"></i><b id="moving">-</b> moving</span>
+        <span><i class="dot stopped"></i><b id="stopped">-</b> stopped</span>
+        <span class="uphide">Updated <b id="updated">-</b></span>
+      </div>
+    </div>
+    <span class="livepill" id="livepill"><i class="dot moving pulse"></i><span id="livetext">Live</span></span>
+    <button class="iconbtn" id="fsbtn" title="Full screen" aria-label="Toggle full screen">
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path class="fs-enter" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+        <path class="fs-exit" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>
+      </svg>
+    </button>
+  </header>
+
+  <main>
+    <section class="sheet" id="sheet" aria-label="Fleet list">
+      <div class="grab" id="grab" title="Drag to resize"><span></span></div>
+      <div class="tabs" id="tabs">
+        <button class="tab on" data-f="all">All <b>0</b></button>
+        <button class="tab" data-f="moving">Moving <b>0</b></button>
+        <button class="tab" data-f="stopped">Stopped <b>0</b></button>
+        <button class="tab" data-f="offline">Offline <b>0</b></button>
+      </div>
+      <ul id="list"></ul>
+      <p class="hint" id="hint">Tap a bus to centre it and follow it live.</p>
+    </section>
+
+    <div class="mapcell">
+      <div id="err" role="status"></div>
+      <div id="map"></div>
+      <div class="dock">
+        <button class="dockbtn" id="locate" title="Show all buses" aria-label="Show all buses">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="7"/>
+            <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+          </svg>
+        </button>
+        <button class="dockbtn" id="follow" title="Follow the selected bus" aria-label="Follow the selected bus" disabled>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="4"/>
+          </svg>
+        </button>
+      </div>
+      <div class="toast" id="toast"></div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

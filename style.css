@@ -1,0 +1,186 @@
+/* Compass live tracking -- mobile-first styles.
+   Layout: header / map / fleet sheet. On phones the sheet sits over the map and can be
+   dragged; on wider screens it becomes a fixed side column. */
+:root{
+  --b:#e2e8f0; --mut:#64748b; --ok:#16a34a; --bad:#dc2626; --info:#1d5be0; --ink:#0f172a;
+  --sheet-h:44vh;                 /* phone: how much of the screen the list takes */
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);
+  overscroll-behavior:none;         /* no rubber-band while dragging the map */
+  -webkit-tap-highlight-color:transparent;
+}
+.app{display:grid;grid-template-rows:auto 1fr;height:100vh;height:100dvh}
+
+/* ---------------------------------------------------------------- header */
+header{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:calc(8px + var(--safe-t)) calc(12px + var(--safe-r)) 8px calc(12px + var(--safe-l));
+  border-bottom:1px solid var(--b);background:#fff;position:relative;z-index:30;
+}
+.titles{min-width:0}
+h1{font-size:15px;margin:0;white-space:nowrap}
+.meta{font-size:11.5px;color:var(--mut);display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+.meta b{color:var(--ink);font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.moving{background:var(--ok)} .stopped{background:var(--bad)} .offline{background:#94a3b8}
+
+.iconbtn{
+  flex:none;display:inline-flex;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:10px;border:1px solid var(--b);background:#fff;
+  color:var(--ink);font-size:17px;cursor:pointer;transition:background .15s,transform .1s;
+}
+.iconbtn:hover{background:#f1f5f9}
+.iconbtn:active{transform:scale(.94)}
+.iconbtn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+#fsbtn .fs-exit{display:none}
+#fsbtn[aria-pressed="true"] .fs-exit{display:inline}
+#fsbtn[aria-pressed="true"] .fs-enter{display:none}
+
+.livepill{
+  margin-left:auto;display:inline-flex;align-items:center;gap:2px;font-size:11.5px;font-weight:700;
+  color:#15803d;background:#f0fdf4;border:1px solid #bbf7d0;padding:5px 10px;border-radius:99px;
+  white-space:nowrap;
+}
+.livepill.down{color:#b91c1c;background:#fef2f2;border-color:#fecaca}
+.livepill.down .dot{background:var(--bad)}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ---------------------------------------------------------------- layout */
+main{display:grid;grid-template-columns:1fr;grid-template-rows:1fr auto;min-height:0;position:relative}
+main.collapsed{grid-template-rows:1fr 0}
+.mapcell{position:relative;min-height:0;grid-row:1}
+#map{height:100%;width:100%;background:#e8eaed}
+
+/* ---------------------------------------------------------------- fleet sheet */
+.sheet{
+  grid-row:2;background:#fff;border-top:1px solid var(--b);
+  height:var(--sheet-h);min-height:0;display:flex;flex-direction:column;
+  padding-bottom:var(--safe-b);
+  box-shadow:0 -6px 20px rgba(15,23,42,.08);
+  transition:height .22s ease, transform .22s ease;
+  z-index:20;position:relative;touch-action:none;
+}
+main.collapsed .sheet{height:0;border-top:0;box-shadow:none;overflow:hidden}
+/* mid-drag: no transition, so it tracks the finger exactly */
+.sheet.dragging{transition:none}
+
+.grab{display:flex;justify-content:center;align-items:center;height:26px;cursor:grab;flex:none}
+.grab span{display:block;width:44px;height:5px;border-radius:99px;background:#cbd5e1}
+.sheet.dragging .grab{cursor:grabbing}
+
+.tabs{display:flex;gap:6px;padding:0 10px 8px;overflow-x:auto;flex:none;touch-action:pan-x}
+.tab{
+  font:inherit;font-size:11.5px;font-weight:600;white-space:nowrap;
+  padding:6px 11px;border-radius:99px;cursor:pointer;border:1px solid transparent;
+  background:#f1f5f9;color:var(--mut);transition:background .15s,color .15s;
+}
+.tab b{font-weight:700;opacity:.75;margin-left:2px}
+.tab.on{background:var(--ink);color:#fff}
+.tab.on b{opacity:.9}
+
+#list{list-style:none;margin:0;padding:0 8px 8px;overflow-y:auto;flex:1;min-height:0;
+      -webkit-overflow-scrolling:touch}
+.row{
+  display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:10px;cursor:pointer;
+  font-size:14px;transition:background .15s,box-shadow .15s;
+}
+.row+.row{margin-top:2px}
+.row:hover{background:#f8fafc}
+.row.on{background:#e8effd;box-shadow:inset 0 0 0 1.5px #9db8f2}
+.row .nm{flex:1;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sp{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums}
+.row .chev{color:#cbd5e1;font-size:16px;line-height:1}
+.empty{padding:14px 10px;color:var(--mut);font-size:13px}
+.hint{margin:0;padding:6px 12px 10px;font-size:11.5px;color:var(--mut);flex:none}
+
+/* ---------------------------------------------------------------- map furniture */
+#err{
+  display:none;position:absolute;z-index:1000;top:12px;left:50%;transform:translateX(-50%);
+  background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:9px 14px;border-radius:10px;
+  font-size:12.5px;max-width:calc(100% - 24px);text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.08);
+}
+.dock{
+  position:absolute;z-index:900;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;
+}
+.dockbtn{
+  width:46px;height:46px;border-radius:14px;border:1px solid var(--b);background:rgba(255,255,255,.97);
+  color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:0 3px 12px rgba(15,23,42,.16);transition:background .15s,transform .1s,opacity .15s;
+}
+.dockbtn:hover{background:#f1f5f9}
+.dockbtn:active{transform:scale(.92)}
+.dockbtn:disabled{opacity:.42;cursor:not-allowed;box-shadow:none}
+.dockbtn[aria-pressed="true"]{background:var(--info);border-color:var(--info);color:#fff}
+.dockbtn.locate{border-color:var(--info);color:var(--info)}
+
+.toast{
+  position:absolute;z-index:1100;left:50%;bottom:76px;transform:translate(-50%,14px);
+  background:rgba(15,23,42,.92);color:#fff;font-size:12.5px;padding:9px 14px;border-radius:10px;
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:calc(100% - 32px);
+  text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.leaflet-marker-icon svg{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 1px #fff)}
+.leaflet-marker-icon.pin-sel svg{animation:pinpop .5s ease-out}
+@keyframes pinpop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+.bt{background:rgba(255,255,255,.95);border:1px solid var(--b);font-weight:600;font-size:11px;
+    padding:1px 6px;box-shadow:0 1px 3px rgba(0,0,0,.12);border-radius:5px}
+.leaflet-tooltip-right.bt::before{display:none}
+.leaflet-control-zoom a{width:32px;height:32px;line-height:30px;font-size:18px}
+.leaflet-control-layers{font-size:12.5px}
+
+/* ---------------------------------------------------------------- fullscreen */
+.app:fullscreen, .app:-webkit-full-screen{height:100vh;height:100dvh;background:#fff}
+.app:fullscreen header{padding-top:calc(10px + var(--safe-t))}
+
+/* ---------------------------------------------------------------- bigger screens */
+@media (min-width:900px){
+  /* side-by-side again: the sheet becomes a column with its own scroll */
+  main{grid-template-columns:300px 1fr;grid-template-rows:1fr}
+  main.collapsed{grid-template-columns:0 1fr}
+  .sheet{grid-row:1;grid-column:1;height:auto;border-top:0;border-right:1px solid var(--b);
+         box-shadow:none;touch-action:auto;transition:none}
+  main.collapsed .sheet{height:auto;border-right:0}
+  .grab{display:none}
+  .tabs{padding:10px 10px 8px}
+  #list{padding:0 8px 10px}
+  .row{padding:8px 9px;font-size:13.5px}
+  .dock{bottom:14px}
+  .toast{bottom:80px}
+  #toggleside{display:inline-flex}
+}
+@media (max-width:899px){
+  /* the sheet overlays the map, so the map keeps the full height behind it */
+  main{grid-template-rows:1fr}
+  .sheet{
+    grid-row:1;align-self:end;width:100%;border-radius:16px 16px 0 0;
+    max-height:76vh;
+  }
+  main.collapsed .sheet{height:0}
+  .mapcell{grid-row:1}
+}
+/* landscape phones: the sheet would eat the map, so cap it and let it shrink */
+@media (max-width:899px) and (orientation:landscape){
+  :root{--sheet-h:38vh}
+}
+@media (max-width:520px){
+  h1{font-size:14px}
+  .uphide{display:none}
+  .livepill{font-size:11px;padding:4px 9px}
+  .meta{gap:8px}
+}
+/* short screens: no room for the hint */
+@media (max-height:560px){ .hint{display:none} }
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
