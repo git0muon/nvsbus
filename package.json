@@ -1,0 +1,11 @@
+{
+  "name": "compass-live-tracking",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Compass live fleet tracking on a natively tiled Leaflet map (HTML/CSS/JS build served from docs/).",
+  "scripts": {
+    "check": "node --check docs/app.js && node --check docs/config.js",
+    "serve": "python -m http.server 8000 --directory docs"
+  },
+  "license": "MIT"
+}

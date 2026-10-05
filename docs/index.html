@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Tracking</title>
+<meta name="description" content="Compass live fleet tracking on a natively tiled Leaflet map (OpenStreetMap and Esri imagery).">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%231B2A6B'/%3E%3Cpolygon points='50,12 40,50 50,42 60,50' fill='%233AABDB'/%3E%3Cpolygon points='50,88 40,50 50,58 60,50' fill='%23E24B4A'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header>
+    <button class="btn ghost" id="toggleside" title="Show or hide the fleet list">&#9776; Fleet list</button>
+    <div>
+      <h1>Live Tracking</h1>
+      <div class="meta">
+        <span><i class="dot moving"></i><b id="online">-</b> / <span id="total">-</span> online</span>
+        <span><i class="dot moving"></i><b id="moving">-</b> moving</span>
+        <span><i class="dot stopped"></i><b id="stopped">-</b> stopped</span>
+        <span>Updated <b id="updated">-</b></span>
+      </div>
+    </div>
+    <span class="livepill" id="livepill"><i class="dot moving pulse"></i><span id="livetext">Live</span></span>
+  </header>
+  <main>
+    <aside>
+      <div class="tabs">
+        <span class="tab on" data-f="all">All</span>
+        <span class="tab" data-f="moving">Moving</span>
+        <span class="tab" data-f="stopped">Stopped</span>
+        <span class="tab" data-f="offline">Offline</span>
+      </div>
+      <ul id="list"></ul>
+    </aside>
+    <div class="mapcell">
+      <div id="err"></div>
+      <div id="map"></div>
+    </div>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
