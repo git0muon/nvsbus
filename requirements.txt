@@ -1,3 +1,0 @@
-# No third-party dependencies: both apps use only the Python standard library.
-# This file exists so hosting platforms (Render, Railway, Heroku-style) recognise the
-# project as a Python app and install nothing.
